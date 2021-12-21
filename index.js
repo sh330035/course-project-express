@@ -3,6 +3,7 @@ const app = express();
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 dotenv.config();
+// 因為在 route 資料夾有設定 index 管理
 const authRoute = require("./routes").auth;
 const courseRoute = require("./routes").course;
 const passport = require("passport");
@@ -11,7 +12,7 @@ require("./config/passport")(passport);
 const cors = require("cors");
 
 mongoose
-  .connect(process.env.DB_CONNET, {
+  .connect(process.env.DB_CONNECT, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -25,7 +26,9 @@ mongoose
 //middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 app.use(cors());
+
 // 一定要加/api，讓前後端溝通順利，避免麻煩
 app.use("/api/user", authRoute);
 app.use(

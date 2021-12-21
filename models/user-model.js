@@ -22,6 +22,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
+    // enumerate 列舉
     enum: ["student", "instructor", "admin"],
     required: true,
   },
@@ -31,21 +32,19 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-// 確認使用者是否為學生
+// 身分確認，製作 API 時會用到
 userSchema.methods.isStudent = function () {
   return this.role == "student";
 };
-
-// 確認使用者是否為講師
 userSchema.methods.isInstructor = function () {
   return this.role == "instructor";
 };
-
 userSchema.methods.isAdmin = function () {
   return this.role == "admin";
 };
 
 // mongoose schma middleware
+// pre save -> 儲存資料之前，希望系統執行以下函式 -> 加密
 userSchema.pre("save", async function (next) {
   if (this.isModified("password") || this.isNew) {
     const hash = await bcrypt.hash(this.password, 10);
@@ -56,7 +55,9 @@ userSchema.pre("save", async function (next) {
   }
 });
 
+// 確認密碼
 // password；this.password：前者為使用者輸入的；後者為hash後的
+// isMatch 會檢查 未加密的password與加密後的 this.password是否相同
 userSchema.methods.comparePassword = function (password, cb) {
   bcrypt.compare(password, this.password, (err, isMatch) => {
     if (err) {

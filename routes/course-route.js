@@ -8,12 +8,14 @@ router.use((req, res, next) => {
 });
 
 router.get("/", (req, res) => {
+  //抓到 instructor 之後，取得 username & email
   Course.find({})
     .populate("instructor", ["username", "email"])
     .then((course) => {
       res.send(course);
     })
-    .catch(() => {
+    .catch((err) => {
+      console.log(err);
       res.status(500).send("Error!! Cannot get course!!");
     });
 });
@@ -78,10 +80,10 @@ router.patch("/:_id", async (req, res) => {
       .then(() => {
         res.send("Course updated.");
       })
-      .catch((e) => {
+      .catch((error) => {
         res.send({
           success: false,
-          message: e,
+          message: error,
         });
       });
   } else {

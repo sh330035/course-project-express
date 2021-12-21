@@ -14,6 +14,8 @@ const courseSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  // 把 mongoDB 中 instructor 存進課程資料中
+  // ref -> 與 user collection 做連結
   instructor: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",

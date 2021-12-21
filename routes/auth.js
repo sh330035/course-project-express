@@ -1,9 +1,11 @@
 const router = require("express").Router();
+// 導入 joi validation
 const registerValidation = require("../validation").registerValidation;
 const loginValidation = require("../validation").loginValidation;
 const User = require("../models").userModel;
 const jwt = require("jsonwebtoken");
 
+// 每次要進行認證時，先經過 middleware 後台就會收到通知
 router.use((req, res, next) => {
   console.log("A request is coming in to auth.js");
   next();
@@ -18,7 +20,9 @@ router.get("/testAPI", (req, res) => {
 
 router.post("/register", async (req, res) => {
   // check the validation of data
+  // 若資料有錯誤，才會在回傳的內容中有 error object (否則只會有 value body)
   const { error } = registerValidation(req.body);
+  // 再從error中，回傳錯誤訊息
   if (error) return res.status(400).send(error.details[0].message);
 
   // check if the user exists
@@ -56,8 +60,11 @@ router.post("/login", (req, res) => {
     if (!user) {
       res.status(401).send("User not found.");
     } else {
+      // user 是資料庫裡的內容， req.body.password 是輸入的內容
+      // isMatch -> 比對成功，回傳 true；失敗回傳 false
       user.comparePassword(req.body.password, function (err, isMatch) {
         if (err) return res.status(400).send(err);
+        // 開始比對資料
         if (isMatch) {
           const tokenObject = { _id: user._id, email: user.email };
           const token = jwt.sign(tokenObject, process.env.PASSPORT_SECRET);
