@@ -18,7 +18,7 @@ const courseSchema = new mongoose.Schema({
   // ref -> 與 user collection 做連結
   instructor: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "user",
   },
   students: {
     type: [String],
