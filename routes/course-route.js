@@ -20,18 +20,6 @@ router.get("/", (req, res) => {
     });
 });
 
-router.get("/instructor/:_instructor_id", (req, res) => {
-  let { _instructor_id } = req.params;
-  Course.find({ instructor: _instructor_id })
-    .populate("instructor", ["username", "email"])
-    .then((data) => {
-      res.send(data);
-    })
-    .catch(() => {
-      res.status(500).send("Cannot get course.");
-    });
-});
-
 router.get("/:_id", (req, res) => {
   let { _id } = req.params;
   Course.findOne({ _id })
@@ -44,6 +32,61 @@ router.get("/:_id", (req, res) => {
     });
 });
 
+// instructor own course api
+router.get("/instructor/:_instructor_id", (req, res) => {
+  let { _instructor_id } = req.params;
+  Course.find({ instructor: _instructor_id })
+    .populate("instructor", ["username", "email"])
+    .then((data) => {
+      res.send(data);
+    })
+    .catch(() => {
+      res.status(500).send("Cannot get course.");
+    });
+});
+
+// student enroll api
+router.get("/student/:_student_id", (req, res) => {
+  let { _student_id } = req.params;
+  Course.find({
+    students: _student_id,
+  })
+    .populate("instructor", ["username", "email"])
+    .then((courses) => {
+      res.status(200).send(courses);
+    })
+    .catch(() => {
+      res.status(500).send("Cannot get course.");
+    });
+});
+
+router.get("/findByName/:name", (req, res) => {
+  let { name } = req.params;
+  Course.find({ title: name })
+    .populate("instructor", ["username", "email"])
+    .then((courses) => {
+      res.status(200).send(courses);
+    })
+    .catch(() => {
+      res.status(500).send("Cannot get course.");
+    });
+});
+
+router.post("/enroll/:_id", async (req, res) => {
+  let { _id } = req.params;
+  let { user_id } = req.body;
+  try {
+    let course = await Course.findOne({ _id });
+    course.students.push(user_id);
+    await course.save();
+    res.send("Done Enrollment!");
+  } catch (error) {
+    res.send(error);
+  }
+});
+
+// instructor api
+// 新增課程
 router.post("/", async (req, res) => {
   // validate the inputs before making a new course
   const { error } = courseValidation(req.body);
@@ -69,6 +112,7 @@ router.post("/", async (req, res) => {
   }
 });
 
+// 修改課程
 router.patch("/:_id", async (req, res) => {
   // validate the inputs before making a new course
   const { error } = courseValidation(req.body);
@@ -108,6 +152,7 @@ router.patch("/:_id", async (req, res) => {
   }
 });
 
+// 刪除課程
 router.delete("/:_id", async (req, res) => {
   let { _id } = req.params;
   let course = await Course.findOne({ _id });
