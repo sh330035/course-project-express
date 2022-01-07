@@ -62,7 +62,7 @@ router.get("/student/:_student_id", (req, res) => {
 
 router.get("/findByName/:name", (req, res) => {
   let { name } = req.params;
-  Course.find({ title: name })
+  Course.find({ $or: [{ title: { $regex: name, $options: "i" } }] })
     .populate("instructor", ["username", "email"])
     .then((courses) => {
       res.status(200).send(courses);
@@ -77,6 +77,10 @@ router.post("/enroll/:_id", async (req, res) => {
   let { user_id } = req.body;
   try {
     let course = await Course.findOne({ _id });
+    if (course.students.includes(user_id)) {
+      res.send("Already enroll this course!");
+      return;
+    }
     course.students.push(user_id);
     await course.save();
     res.send("Done Enrollment!");
