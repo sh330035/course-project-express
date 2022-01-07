@@ -85,6 +85,21 @@ router.post("/enroll/:_id", async (req, res) => {
   }
 });
 
+router.post("/enroll/drop/:_id", async (req, res) => {
+  let { _id } = req.params;
+  let { user_id } = req.body;
+  try {
+    let course = await Course.findOne({ _id });
+    course.students = course.students.filter(
+      (student_id) => student_id !== user_id
+    );
+    await course.save();
+    res.send("Course is dropped");
+  } catch (error) {
+    res.send(error);
+  }
+});
+
 // instructor api
 // 新增課程
 router.post("/", async (req, res) => {
